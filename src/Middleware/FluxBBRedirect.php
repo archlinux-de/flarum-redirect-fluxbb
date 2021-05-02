@@ -39,8 +39,10 @@ class FluxBBRedirect implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (in_array($request->getMethod(), ['GET', 'HEAD'])
-            && preg_match('#^/\w+\.php$#', $request->getUri()->getPath())) {
+        if (
+            in_array($request->getMethod(), ['GET', 'HEAD'])
+            && preg_match('#^/\w+\.php$#', $request->getUri()->getPath())
+        ) {
             return $this->handleRequest($request, $handler);
         }
 
@@ -50,13 +52,11 @@ class FluxBBRedirect implements MiddlewareInterface
     private function handleRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $query = $request->getQueryParams();
-        $path = $this->urlGenerator->to('forum')->route('default');
         $status = 302;
 
         switch ($request->getUri()->getPath()) {
             case '/extern.php':
                 return new Response(status: 404);
-                break;
             case '/index.php':
                 $status = 301;
                 break;
@@ -73,6 +73,7 @@ class FluxBBRedirect implements MiddlewareInterface
                 break;
             case '/search.php':
                 if (isset($query['action'])) {
+                    $path = $this->urlGenerator->to('forum')->route('default');
                     switch ($query['action']) {
                         case 'search':
                             if (isset($query['keywords']) && $query['keywords']) {
@@ -122,6 +123,12 @@ class FluxBBRedirect implements MiddlewareInterface
                     }
                 }
                 break;
+            default:
+                $path = $this->urlGenerator->to('forum')->route('default');
+        }
+
+        if (!isset($path)) {
+            return new Response(status: 404);
         }
 
         return new RedirectResponse($path, $status);
