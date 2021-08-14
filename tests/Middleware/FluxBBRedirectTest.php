@@ -178,6 +178,116 @@ class FluxBBRedirectTest extends TestCase
         $this->assertRedirect($response, '/new-url');
     }
 
+    public function testRedirectPostFormsQuote(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->atLeastOnce())
+            ->method('route')
+            ->with('discussion', ['id' => 456, 'near' => 789])
+            ->willReturn('/new-url');
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/post.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['qid' => 123]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
+    public function testRedirectPostFormsThread(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->atLeastOnce())
+            ->method('route')
+            ->with('discussion', ['id' => 123])
+            ->willReturn('/new-url');
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/post.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['tid' => 123]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
+    public function testRedirectPostEdit(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->atLeastOnce())
+            ->method('route')
+            ->with('discussion', ['id' => 456, 'near' => 789])
+            ->willReturn('/new-url');
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/edit.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['id' => 123]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
+    public function testRedirectModerateThread(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->atLeastOnce())
+            ->method('route')
+            ->with('discussion', ['id' => 123])
+            ->willReturn('/new-url');
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/moderate.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['tid' => 123]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
+    public function testRedirectModerateForum(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->atLeastOnce())
+            ->method('route')
+            ->with('tag', ['slug' => 'foo-tag'])
+            ->willReturn('/new-url');
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/moderate.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['fid' => 123]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
     public function testRedirectProfiles(): void
     {
         $this->routeCollectionUrlGenerator
@@ -195,6 +305,28 @@ class FluxBBRedirectTest extends TestCase
             ->expects($this->atLeastOnce())
             ->method('getQueryParams')
             ->willReturn(['id' => 1011]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
+    public function testRedirectEmail(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->atLeastOnce())
+            ->method('route')
+            ->with('user', ['username' => 'foo-username'])
+            ->willReturn('/new-url');
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/misc.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['email' => 1011]);
 
         $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
         $this->assertRedirect($response, '/new-url');

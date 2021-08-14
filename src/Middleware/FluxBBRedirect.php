@@ -87,6 +87,7 @@ class FluxBBRedirect implements MiddlewareInterface
                         case 'show_new':
                         case 'show_recent':
                         case 'show_unanswered':
+                        case 'show_24h':
                             $path .= '?sort=newest';
                             $status = 301;
                             break;
@@ -121,6 +122,66 @@ class FluxBBRedirect implements MiddlewareInterface
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                     }
+                }
+                break;
+            case '/post.php':
+                if (isset($query['qid'])) {
+                    try {
+                        $post = $this->postRepository->findOrFail(intval($query['qid']));
+                        $path = $this->urlGenerator->to('forum')
+                            ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
+                        $status = 301;
+                    } catch (ModelNotFoundException $e) {
+                    }
+                } elseif (isset($query['tid'])) {
+                    try {
+                        $discussion = $this->discussionRepository->findOrFail(intval($query['tid']));
+                        $path = $this->urlGenerator->to('forum')
+                            ->route('discussion', ['id' => $discussion->id]);
+                        $status = 301;
+                    } catch (ModelNotFoundException $e) {
+                    }
+                }
+                break;
+            case '/edit.php':
+                if (isset($query['id'])) {
+                    try {
+                        $post = $this->postRepository->findOrFail(intval($query['id']));
+                        $path = $this->urlGenerator->to('forum')
+                            ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
+                        $status = 301;
+                    } catch (ModelNotFoundException $e) {
+                    }
+                }
+                break;
+            case '/moderate.php':
+                if (isset($query['tid'])) {
+                    try {
+                        $discussion = $this->discussionRepository->findOrFail(intval($query['tid']));
+                        $path = $this->urlGenerator->to('forum')
+                            ->route('discussion', ['id' => $discussion->id]);
+                        $status = 301;
+                    } catch (ModelNotFoundException $e) {
+                    }
+                } elseif (isset($query['fid'])) {
+                    try {
+                        $tag = $this->tagRepository->findOrFail(intval($query['fid']));
+                        $path = $this->urlGenerator->to('forum')
+                            ->route('tag', ['slug' => $tag->slug]);
+                        $status = 301;
+                    } catch (ModelNotFoundException $e) {
+                    }
+                }
+                break;
+            case '/misc.php':
+                try {
+                    if (isset($query['email'])) {
+                        $user = $this->userRepository->findOrFail(intval($query['email']));
+                        $path = $this->urlGenerator->to('forum')
+                            ->route('user', ['username' => $user->username]);
+                        $status = 301;
+                    }
+                } catch (ModelNotFoundException $e) {
                 }
                 break;
             default:
