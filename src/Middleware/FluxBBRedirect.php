@@ -117,13 +117,12 @@ class FluxBBRedirect implements MiddlewareInterface
                 if (isset($query['id'])) {
                     try {
                         $discussion = $this->discussionRepository->findOrFail(intval($query['id']));
-                        $path = $this->urlGenerator->to('forum')
-                            ->route(
-                                'discussion',
-                                [
-                                    'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion)
-                                ]
-                            );
+                        $parameters = ['id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion)];
+                        if (isset($query['p']) && intval($query['p']) > 1) {
+                            // FluxBB's default page size is 25 posts
+                            $parameters['near'] = ((intval($query['p']) - 1) * 25) + 1;
+                        }
+                        $path = $this->urlGenerator->to('forum')->route('discussion', $parameters);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                         $status = 404;

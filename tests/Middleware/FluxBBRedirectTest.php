@@ -177,6 +177,32 @@ class FluxBBRedirectTest extends TestCase
         $this->assertRedirect($response, '/new-url');
     }
 
+    public function testRedirectTopicPages(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->exactly(2))
+            ->method('route')
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['discussion', ['id' => '123-foo', 'near' => 26], '/new-url']
+                                      ])
+            );
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/viewtopic.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['id' => 123, 'p' => 2]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
     public function testRedirectPosts(): void
     {
         $this->routeCollectionUrlGenerator
