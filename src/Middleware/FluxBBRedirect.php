@@ -148,6 +148,15 @@ class FluxBBRedirect implements MiddlewareInterface
                     } catch (ModelNotFoundException $e) {
                         $status = 404;
                     }
+                } elseif (isset($query['fid'])) {
+                    try {
+                        $tag = $this->tagRepository->findOrFail(intval($query['fid']));
+                        $path = $this->urlGenerator->to('forum')
+                            ->route('tag', ['slug' => $tag->slug]);
+                        $status = 301;
+                    } catch (ModelNotFoundException $e) {
+                        // Implicitly redirect to forum index
+                    }
                 }
                 break;
             case '/edit.php':
