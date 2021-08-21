@@ -115,10 +115,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectForums(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('tag', ['slug' => 'foo-tag'])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['tag', ['slug' => 'foo-tag'], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -137,10 +141,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectTopics(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('discussion', ['id' => 123])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['discussion', ['id' => 123], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -159,10 +167,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectPosts(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('discussion', ['id' => 456, 'near' => 789])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['discussion', ['id' => 456, 'near' => 789], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -181,10 +193,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectPostFormsQuote(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('discussion', ['id' => 456, 'near' => 789])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['discussion', ['id' => 456, 'near' => 789], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -203,10 +219,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectPostFormsThread(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('discussion', ['id' => 123])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['discussion', ['id' => 123], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -225,10 +245,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectPostEdit(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('discussion', ['id' => 456, 'near' => 789])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['discussion', ['id' => 456, 'near' => 789], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -247,10 +271,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectModerateThread(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('discussion', ['id' => 123])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['discussion', ['id' => 123], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -269,10 +297,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectModerateForum(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('tag', ['slug' => 'foo-tag'])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['tag', ['slug' => 'foo-tag'], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -291,10 +323,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectProfiles(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('user', ['username' => 'foo-username'])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['user', ['username' => 'foo-username'], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -313,10 +349,14 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectEmail(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(2))
             ->method('route')
-            ->with('user', ['username' => 'foo-username'])
-            ->willReturn('/new-url');
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['user', ['username' => 'foo-username'], '/new-url']
+                                      ])
+            );
 
         $this->requestUri
             ->expects($this->atLeastOnce())
@@ -335,7 +375,7 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectSearches(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(1))
             ->method('route')
             ->with('default')
             ->willReturn('/new-url');
@@ -357,7 +397,7 @@ class FluxBBRedirectTest extends TestCase
     public function testRedirectFallback(): void
     {
         $this->routeCollectionUrlGenerator
-            ->expects($this->atLeastOnce())
+            ->expects($this->exactly(1))
             ->method('route')
             ->with('default')
             ->willReturn('/new-url');

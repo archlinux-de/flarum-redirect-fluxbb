@@ -52,11 +52,13 @@ class FluxBBRedirect implements MiddlewareInterface
     private function handleRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $query = $request->getQueryParams();
+        $path = $this->urlGenerator->to('forum')->route('default');
         $status = 302;
 
         switch ($request->getUri()->getPath()) {
             case '/extern.php':
-                return new Response(status: 404);
+                $status = 404;
+                break;
             case '/index.php':
                 $status = 301;
                 break;
@@ -69,11 +71,11 @@ class FluxBBRedirect implements MiddlewareInterface
                         $status = 301;
                     }
                 } catch (ModelNotFoundException $e) {
+                    $status = 404;
                 }
                 break;
             case '/search.php':
                 if (isset($query['action'])) {
-                    $path = $this->urlGenerator->to('forum')->route('default');
                     switch ($query['action']) {
                         case 'search':
                             if (isset($query['keywords']) && $query['keywords']) {
@@ -102,6 +104,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('tag', ['slug' => $tag->slug]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        // Implicitly redirect to forum index
                     }
                 }
                 break;
@@ -113,6 +116,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('discussion', ['id' => $discussion->id]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        $status = 404;
                     }
                 } elseif (isset($query['pid'])) {
                     try {
@@ -121,6 +125,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        $status = 404;
                     }
                 }
                 break;
@@ -132,6 +137,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        $status = 404;
                     }
                 } elseif (isset($query['tid'])) {
                     try {
@@ -140,6 +146,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('discussion', ['id' => $discussion->id]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        $status = 404;
                     }
                 }
                 break;
@@ -151,6 +158,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        $status = 404;
                     }
                 }
                 break;
@@ -162,6 +170,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('discussion', ['id' => $discussion->id]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        $status = 404;
                     }
                 } elseif (isset($query['fid'])) {
                     try {
@@ -170,6 +179,7 @@ class FluxBBRedirect implements MiddlewareInterface
                             ->route('tag', ['slug' => $tag->slug]);
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
+                        $status = 404;
                     }
                 }
                 break;
@@ -182,13 +192,12 @@ class FluxBBRedirect implements MiddlewareInterface
                         $status = 301;
                     }
                 } catch (ModelNotFoundException $e) {
+                    $status = 404;
                 }
                 break;
-            default:
-                $path = $this->urlGenerator->to('forum')->route('default');
         }
 
-        if (!isset($path)) {
+        if ($status === 404) {
             return new Response(status: 404);
         }
 
