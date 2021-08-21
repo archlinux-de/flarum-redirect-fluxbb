@@ -2,7 +2,9 @@
 
 namespace ArchLinux\RedirectFluxBB\Middleware;
 
+use Flarum\Discussion\Discussion;
 use Flarum\Discussion\DiscussionRepository;
+use Flarum\Http\SlugManager;
 use Flarum\Http\UrlGenerator;
 use Flarum\Post\PostRepository;
 use Flarum\Tags\TagRepository;
@@ -22,19 +24,22 @@ class FluxBBRedirect implements MiddlewareInterface
     private DiscussionRepository $discussionRepository;
     private TagRepository $tagRepository;
     private UserRepository $userRepository;
+    private SlugManager $slugManager;
 
     public function __construct(
         UrlGenerator $urlGenerator,
         PostRepository $postRepository,
         TagRepository $tagRepository,
         UserRepository $userRepository,
-        DiscussionRepository $discussionRepository
+        DiscussionRepository $discussionRepository,
+        SlugManager $slugManager
     ) {
         $this->urlGenerator = $urlGenerator;
         $this->postRepository = $postRepository;
         $this->tagRepository = $tagRepository;
         $this->userRepository = $userRepository;
         $this->discussionRepository = $discussionRepository;
+        $this->slugManager = $slugManager;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -113,7 +118,12 @@ class FluxBBRedirect implements MiddlewareInterface
                     try {
                         $discussion = $this->discussionRepository->findOrFail(intval($query['id']));
                         $path = $this->urlGenerator->to('forum')
-                            ->route('discussion', ['id' => $discussion->id]);
+                            ->route(
+                                'discussion',
+                                [
+                                    'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion)
+                                ]
+                            );
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                         $status = 404;
@@ -121,8 +131,15 @@ class FluxBBRedirect implements MiddlewareInterface
                 } elseif (isset($query['pid'])) {
                     try {
                         $post = $this->postRepository->findOrFail(intval($query['pid']));
+                        $discussion = $this->discussionRepository->findOrFail($post->discussion_id);
                         $path = $this->urlGenerator->to('forum')
-                            ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
+                            ->route(
+                                'discussion',
+                                [
+                                    'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion),
+                                    'near' => $post->number
+                                ]
+                            );
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                         $status = 404;
@@ -133,8 +150,15 @@ class FluxBBRedirect implements MiddlewareInterface
                 if (isset($query['qid'])) {
                     try {
                         $post = $this->postRepository->findOrFail(intval($query['qid']));
+                        $discussion = $this->discussionRepository->findOrFail($post->discussion_id);
                         $path = $this->urlGenerator->to('forum')
-                            ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
+                            ->route(
+                                'discussion',
+                                [
+                                    'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion),
+                                    'near' => $post->number
+                                ]
+                            );
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                         $status = 404;
@@ -143,7 +167,12 @@ class FluxBBRedirect implements MiddlewareInterface
                     try {
                         $discussion = $this->discussionRepository->findOrFail(intval($query['tid']));
                         $path = $this->urlGenerator->to('forum')
-                            ->route('discussion', ['id' => $discussion->id]);
+                            ->route(
+                                'discussion',
+                                [
+                                    'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion)
+                                ]
+                            );
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                         $status = 404;
@@ -163,8 +192,15 @@ class FluxBBRedirect implements MiddlewareInterface
                 if (isset($query['id'])) {
                     try {
                         $post = $this->postRepository->findOrFail(intval($query['id']));
+                        $discussion = $this->discussionRepository->findOrFail($post->discussion_id);
                         $path = $this->urlGenerator->to('forum')
-                            ->route('discussion', ['id' => $post->discussion_id, 'near' => $post->number]);
+                            ->route(
+                                'discussion',
+                                [
+                                    'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion),
+                                    'near' => $post->number
+                                ]
+                            );
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                         $status = 404;
@@ -176,7 +212,12 @@ class FluxBBRedirect implements MiddlewareInterface
                     try {
                         $discussion = $this->discussionRepository->findOrFail(intval($query['tid']));
                         $path = $this->urlGenerator->to('forum')
-                            ->route('discussion', ['id' => $discussion->id]);
+                            ->route(
+                                'discussion',
+                                [
+                                    'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion)
+                                ]
+                            );
                         $status = 301;
                     } catch (ModelNotFoundException $e) {
                         $status = 404;

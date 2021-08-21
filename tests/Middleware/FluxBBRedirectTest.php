@@ -3,8 +3,12 @@
 namespace ArchLinux\RedirectFluxBB\Test\Middleware;
 
 use ArchLinux\RedirectFluxBB\Middleware\FluxBBRedirect;
+use Flarum\Database\AbstractModel;
+use Flarum\Discussion\Discussion;
 use Flarum\Discussion\DiscussionRepository;
+use Flarum\Discussion\IdWithTransliteratedSlugDriver;
 use Flarum\Http\RouteCollectionUrlGenerator;
+use Flarum\Http\SlugManager;
 use Flarum\Http\UrlGenerator;
 use Flarum\Post\PostRepository;
 use Flarum\Tags\TagRepository;
@@ -43,13 +47,15 @@ class FluxBBRedirectTest extends TestCase
         $this->requestHandler = $this->createMock(RequestHandlerInterface::class);
         $this->requestUri = $this->createMock(UriInterface::class);
         $this->routeCollectionUrlGenerator = $this->createMock(RouteCollectionUrlGenerator::class);
+        $slugManager = $this->createMock(SlugManager::class);
 
         $discussionRepository
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class {
+                new class extends AbstractModel {
                     public int $id = 123;
+                    public string $slug = 'foo';
                 }
             );
 
@@ -58,7 +64,7 @@ class FluxBBRedirectTest extends TestCase
             ->method('findOrFail')
             ->willReturn(
                 new class {
-                    public int $discussion_id = 456;
+                    public int $discussion_id = 123;
                     public int $number = 789;
                 }
             );
@@ -96,12 +102,19 @@ class FluxBBRedirectTest extends TestCase
             ->method('getUri')
             ->willReturn($this->requestUri);
 
+        $slugManager
+            ->expects($this->any())
+            ->method('forResource')
+            ->with(Discussion::class)
+            ->willReturn(new IdWithTransliteratedSlugDriver($discussionRepository));
+
         $this->fluxBBRedirect = new FluxBBRedirect(
             $urlGenerator,
             $postRepository,
             $tagRepository,
             $userRepository,
-            $discussionRepository
+            $discussionRepository,
+            $slugManager
         );
     }
 
@@ -146,7 +159,7 @@ class FluxBBRedirectTest extends TestCase
             ->will(
                 $this->returnValueMap([
                                           ['default', '/'],
-                                          ['discussion', ['id' => 123], '/new-url']
+                                          ['discussion', ['id' => '123-foo'], '/new-url']
                                       ])
             );
 
@@ -172,7 +185,7 @@ class FluxBBRedirectTest extends TestCase
             ->will(
                 $this->returnValueMap([
                                           ['default', '/'],
-                                          ['discussion', ['id' => 456, 'near' => 789], '/new-url']
+                                          ['discussion', ['id' => '123-foo', 'near' => 789], '/new-url']
                                       ])
             );
 
@@ -198,7 +211,7 @@ class FluxBBRedirectTest extends TestCase
             ->will(
                 $this->returnValueMap([
                                           ['default', '/'],
-                                          ['discussion', ['id' => 456, 'near' => 789], '/new-url']
+                                          ['discussion', ['id' => '123-foo', 'near' => 789], '/new-url']
                                       ])
             );
 
@@ -224,7 +237,7 @@ class FluxBBRedirectTest extends TestCase
             ->will(
                 $this->returnValueMap([
                                           ['default', '/'],
-                                          ['discussion', ['id' => 123], '/new-url']
+                                          ['discussion', ['id' => '123-foo'], '/new-url']
                                       ])
             );
 
@@ -250,7 +263,7 @@ class FluxBBRedirectTest extends TestCase
             ->will(
                 $this->returnValueMap([
                                           ['default', '/'],
-                                          ['discussion', ['id' => 456, 'near' => 789], '/new-url']
+                                          ['discussion', ['id' => '123-foo', 'near' => 789], '/new-url']
                                       ])
             );
 
@@ -276,7 +289,7 @@ class FluxBBRedirectTest extends TestCase
             ->will(
                 $this->returnValueMap([
                                           ['default', '/'],
-                                          ['discussion', ['id' => 123], '/new-url']
+                                          ['discussion', ['id' => '123-foo'], '/new-url']
                                       ])
             );
 
