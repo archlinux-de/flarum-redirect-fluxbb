@@ -129,6 +129,28 @@ class FluxBBRedirectTest extends TestCase
         $this->assertEquals($expectedUrl, $response->getHeader('Location')[0]);
     }
 
+    public function testRedirectIndex(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->once())
+            ->method('route')
+            ->with('default')
+            ->willReturn('/');
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/index.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn([]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/');
+    }
+
     public function testRedirectForums(): void
     {
         $this->routeCollectionUrlGenerator
@@ -280,6 +302,32 @@ class FluxBBRedirectTest extends TestCase
             ->expects($this->atLeastOnce())
             ->method('getQueryParams')
             ->willReturn(['tid' => 123]);
+
+        $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
+        $this->assertRedirect($response, '/new-url');
+    }
+
+    public function testRedirectPostFormsForum(): void
+    {
+        $this->routeCollectionUrlGenerator
+            ->expects($this->exactly(2))
+            ->method('route')
+            ->will(
+                $this->returnValueMap([
+                                          ['default', '/'],
+                                          ['tag', ['slug' => 'foo-tag'], '/new-url']
+                                      ])
+            );
+
+        $this->requestUri
+            ->expects($this->atLeastOnce())
+            ->method('getPath')
+            ->willReturn('/post.php');
+
+        $this->request
+            ->expects($this->atLeastOnce())
+            ->method('getQueryParams')
+            ->willReturn(['fid' => 123]);
 
         $response = $this->fluxBBRedirect->process($this->request, $this->requestHandler);
         $this->assertRedirect($response, '/new-url');
