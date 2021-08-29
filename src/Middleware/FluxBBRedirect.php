@@ -8,6 +8,7 @@ use Flarum\Http\SlugManager;
 use Flarum\Http\UrlGenerator;
 use Flarum\Post\PostRepository;
 use Flarum\Tags\TagRepository;
+use Flarum\User\User;
 use Flarum\User\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Laminas\Diactoros\Response;
@@ -19,27 +20,14 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class FluxBBRedirect implements MiddlewareInterface
 {
-    private UrlGenerator $urlGenerator;
-    private PostRepository $postRepository;
-    private DiscussionRepository $discussionRepository;
-    private TagRepository $tagRepository;
-    private UserRepository $userRepository;
-    private SlugManager $slugManager;
-
     public function __construct(
-        UrlGenerator $urlGenerator,
-        PostRepository $postRepository,
-        TagRepository $tagRepository,
-        UserRepository $userRepository,
-        DiscussionRepository $discussionRepository,
-        SlugManager $slugManager
+        private UrlGenerator $urlGenerator,
+        private PostRepository $postRepository,
+        private TagRepository $tagRepository,
+        private UserRepository $userRepository,
+        private DiscussionRepository $discussionRepository,
+        private SlugManager $slugManager
     ) {
-        $this->urlGenerator = $urlGenerator;
-        $this->postRepository = $postRepository;
-        $this->tagRepository = $tagRepository;
-        $this->userRepository = $userRepository;
-        $this->discussionRepository = $discussionRepository;
-        $this->slugManager = $slugManager;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -71,8 +59,10 @@ class FluxBBRedirect implements MiddlewareInterface
                 try {
                     if (isset($query['id'])) {
                         $user = $this->userRepository->findOrFail(intval($query['id']));
-                        $path = $this->urlGenerator->to('forum')
-                            ->route('user', ['username' => $user->username]);
+                        $path = $this->urlGenerator->to('forum')->route(
+                            'user',
+                            ['username' => $this->slugManager->forResource(User::class)->toSlug($user)]
+                        );
                         $status = 301;
                     }
                 } catch (ModelNotFoundException $e) {
@@ -236,8 +226,10 @@ class FluxBBRedirect implements MiddlewareInterface
                 try {
                     if (isset($query['email'])) {
                         $user = $this->userRepository->findOrFail(intval($query['email']));
-                        $path = $this->urlGenerator->to('forum')
-                            ->route('user', ['username' => $user->username]);
+                        $path = $this->urlGenerator->to('forum')->route(
+                            'user',
+                            ['username' => $this->slugManager->forResource(User::class)->toSlug($user)]
+                        );
                         $status = 301;
                     }
                 } catch (ModelNotFoundException $e) {

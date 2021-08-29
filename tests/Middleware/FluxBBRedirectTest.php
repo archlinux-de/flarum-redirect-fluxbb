@@ -12,6 +12,8 @@ use Flarum\Http\SlugManager;
 use Flarum\Http\UrlGenerator;
 use Flarum\Post\PostRepository;
 use Flarum\Tags\TagRepository;
+use Flarum\User\User;
+use Flarum\User\UsernameSlugDriver;
 use Flarum\User\UserRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -63,7 +65,7 @@ class FluxBBRedirectTest extends TestCase
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class {
+                new class extends AbstractModel {
                     public int $discussion_id = 123;
                     public int $number = 789;
                 }
@@ -73,7 +75,7 @@ class FluxBBRedirectTest extends TestCase
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class {
+                new class extends AbstractModel {
                     public string $slug = 'foo-tag';
                 }
             );
@@ -82,7 +84,7 @@ class FluxBBRedirectTest extends TestCase
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class {
+                new class extends AbstractModel {
                     public string $username = 'foo-username';
                 }
             );
@@ -105,8 +107,10 @@ class FluxBBRedirectTest extends TestCase
         $slugManager
             ->expects($this->any())
             ->method('forResource')
-            ->with(Discussion::class)
-            ->willReturn(new IdWithTransliteratedSlugDriver($discussionRepository));
+            ->willReturnMap([
+                                [Discussion::class, new IdWithTransliteratedSlugDriver($discussionRepository)],
+                                [User::class, new UsernameSlugDriver($userRepository)]
+                            ]);
 
         $this->fluxBBRedirect = new FluxBBRedirect(
             $urlGenerator,
