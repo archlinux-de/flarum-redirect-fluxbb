@@ -4,7 +4,7 @@
     "license": "GPL-3.0-or-later",
     "type": "flarum-extension",
     "require": {
-        "PHP": "^8.0",
+        "PHP": "^8.1",
         "flarum/core": "^1.0.0",
         "flarum/tags": "^1.0.0"
     },
