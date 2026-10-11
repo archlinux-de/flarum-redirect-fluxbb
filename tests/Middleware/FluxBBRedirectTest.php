@@ -3,14 +3,15 @@
 namespace ArchLinux\RedirectFluxBB\Test\Middleware;
 
 use ArchLinux\RedirectFluxBB\Middleware\FluxBBRedirect;
-use Flarum\Database\AbstractModel;
 use Flarum\Discussion\Discussion;
 use Flarum\Discussion\DiscussionRepository;
 use Flarum\Discussion\IdWithTransliteratedSlugDriver;
 use Flarum\Http\RouteCollectionUrlGenerator;
 use Flarum\Http\SlugManager;
 use Flarum\Http\UrlGenerator;
+use Flarum\Post\CommentPost;
 use Flarum\Post\PostRepository;
+use Flarum\Tags\Tag;
 use Flarum\Tags\TagRepository;
 use Flarum\User\User;
 use Flarum\User\UsernameSlugDriver;
@@ -51,38 +52,28 @@ class FluxBBRedirectTest extends TestCase
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class extends AbstractModel {
-                    public int $id = 123;
-                    public string $slug = 'foo';
-                }
+                (new Discussion())->setRawAttributes(['id' => 123, 'slug' => 'foo'])
             );
 
         $postRepository
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class extends AbstractModel {
-                    public int $discussion_id = 123;
-                    public int $number = 789;
-                }
+                (new CommentPost())->setRawAttributes(['discussion_id' => 123, 'number' => 789])
             );
 
         $tagRepository
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class extends AbstractModel {
-                    public string $slug = 'foo-tag';
-                }
+                (new Tag())->setRawAttributes(['slug' => 'foo-tag'])
             );
 
         $userRepository
             ->expects($this->any())
             ->method('findOrFail')
             ->willReturn(
-                new class extends AbstractModel {
-                    public string $username = 'foo-username';
-                }
+                (new User())->setRawAttributes(['username' => 'foo-username'])
             );
 
         $urlGenerator
@@ -226,7 +217,7 @@ class FluxBBRedirectTest extends TestCase
             ->method('route')
             ->willReturnMap([
                 ['default', '/'],
-                ['discussion', ['id' => '123-foo', 'near' => '789'], '/new-url']
+                ['discussion', ['id' => '123-foo', 'near' => 789], '/new-url']
             ]);
 
         $this->requestUri
@@ -250,7 +241,7 @@ class FluxBBRedirectTest extends TestCase
             ->method('route')
             ->willReturnMap([
                 ['default', '/'],
-                ['discussion', ['id' => '123-foo', 'near' => '789'], '/new-url']
+                ['discussion', ['id' => '123-foo', 'near' => 789], '/new-url']
             ]);
 
         $this->requestUri
@@ -322,7 +313,7 @@ class FluxBBRedirectTest extends TestCase
             ->method('route')
             ->willReturnMap([
                 ['default', '/'],
-                ['discussion', ['id' => '123-foo', 'near' => '789'], '/new-url']
+                ['discussion', ['id' => '123-foo', 'near' => 789], '/new-url']
             ]);
 
         $this->requestUri

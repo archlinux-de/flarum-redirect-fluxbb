@@ -20,6 +20,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class FluxBBRedirect implements MiddlewareInterface
 {
+    /** @param UserRepository<User> $userRepository */
     public function __construct(
         private readonly UrlGenerator $urlGenerator,
         private readonly PostRepository $postRepository,
@@ -126,7 +127,7 @@ class FluxBBRedirect implements MiddlewareInterface
                                 'discussion',
                                 [
                                     'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion),
-                                    'near' => (string) $post->number
+                                    'near' => $post->number
                                 ]
                             );
                         $status = 301;
@@ -145,7 +146,7 @@ class FluxBBRedirect implements MiddlewareInterface
                                 'discussion',
                                 [
                                     'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion),
-                                    'near' => (string) $post->number
+                                    'near' => $post->number
                                 ]
                             );
                         $status = 301;
@@ -187,7 +188,7 @@ class FluxBBRedirect implements MiddlewareInterface
                                 'discussion',
                                 [
                                     'id' => $this->slugManager->forResource(Discussion::class)->toSlug($discussion),
-                                    'near' => (string) $post->number
+                                    'near' => $post->number
                                 ]
                             );
                         $status = 301;
